@@ -3,6 +3,7 @@ import { Button, Container } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const RegisterPage = () => {
   const [formValues, setFormValues] = useState({
@@ -27,57 +28,40 @@ const RegisterPage = () => {
     }
   }
 
-  /*   const handleClick = () => {
-      if (formValues.pass === formValues.rpass) {
-        localStorage.setItem('user', JSON.stringify(formValues))
-        Swal.fire(
-          'Bienvenido!',
-          'Registro Exitoso!',
-          'success'
-        )
-        navigate('/login')
+  const handleClick = async (ev) => {
+    try {
+      if (formValues.userName) {
+        if (formValues.pass && formValues.pass.length >= 8) {
+          if (formValues.pass === formValues.rpass) {
+            const res = await clienteAxios.post('/users', {
+              username: formValues.userName,
+              pass: formValues.pass
+            }, config)
+
+            if (res.status === 201) {
+              Swal.fire(
+                'Bienvenido!',
+                res.data.msg,
+                'success'
+              )
+              navigate('/login')
+            }
+          }
+        } else {
+          setCheckInputPass(true)
+        }
+
       } else {
+        setCheckInputUser(true)
+      }
+    } catch (error) {
+      if (error.response.status === 400) {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Usuario y/o contraseña incorrecto',
+          text: error.response.data.msg
         })
       }
-    } */
-
-  const handleClick = async (ev) => {
-    if (formValues.userName) {
-      if (formValues.pass && formValues.pass.length >= 8) {
-        if (formValues.pass === formValues.rpass) {
-          const res = await fetch('http://localhost:8080/api/users', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              username: formValues.userName,
-              pass: formValues.pass
-            })
-          })
-
-          const data = await res.json()
-
-          if(data.status === 201){
-            Swal.fire(
-              'Bienvenido!',
-              'Registro Exitoso!',
-              'success'
-            )
-            navigate('/login')
-          }
-        }
-      } else {
-        setCheckInputPass(true)
-      }
-
-    } else {
-      setCheckInputUser(true)
-
     }
 
   }

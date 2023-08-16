@@ -4,6 +4,7 @@ import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Swal from 'sweetalert2';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const AdminUserPage = () => {
   const [allUsers, setAllUsers] = useState([])
@@ -20,16 +21,8 @@ const AdminUserPage = () => {
   };
 
   const getAllUsers = async () => {
-    const res = await fetch('http://localhost:8080/api/users',{
-      method:'GET',
-      headers:{
-        'content-type':'application/json',
-        'auth': `Bearer ${JSON.parse(localStorage.getItem('token'))}`
-      }
-    })
-    const response = await res.json()
-    console.log(response)
-    setAllUsers(response.allUsers)
+    const res = await clienteAxios.get('/users', config)
+    setAllUsers(res.data.allUsers)
   }
 
   const handleChange = (ev, userId) => {
@@ -61,19 +54,12 @@ const AdminUserPage = () => {
     }).then((result) => {
       if (result.isConfirmed) {
 
-        fetch(`http://localhost:8080/api/users/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'content-type': 'application/json',
-            'auth': `Bearer ${JSON.parse(localStorage.getItem('token'))}`
-          }
-        })
-          .then(res => res.json())
+        clienteAxios.delete(`users/${id}`, config)
           .then(res => {
             if (res.status === 200) {
               swalWithBootstrapButtons.fire(
                 'Eliminado!',
-                res.msg,
+                res.data.msg,
                 'success'
               )
             }
@@ -81,7 +67,6 @@ const AdminUserPage = () => {
 
         resRefreshState(true)
       } else if (
-        /* Read more about handling dismissals below */
         result.dismiss === Swal.DismissReason.cancel
       ) {
         swalWithBootstrapButtons.fire(
@@ -93,27 +78,18 @@ const AdminUserPage = () => {
     })
   }
 
-  const handleSendClick = async(id) => {
+  const handleSendClick = async (id) => {
     const filterUserSend = allUsers.filter((user) => user._id === id)
+    const res = await clienteAxios.put(`/users/${id}`, filterUserSend[0], config)
 
-    const res = await fetch(`http://localhost:8080/api/users/${id}`,{
-      method:'PUT',
-      headers:{
-        'content-type':'application/json',
-        'auth': `Bearer ${JSON.parse(localStorage.getItem('token'))}`
-      },
-      body: JSON.stringify(filterUserSend[0])
-    })
-    const response = await res.json()
-     if(response.status === 200){
+    if (res.status === 200) {
       Swal.fire(
-        response.msg,
+        res.data.msg,
         '',
         'success'
       )
-     }
+    }
     handleClose(filterUserSend[0])
-
   }
 
   useEffect(() => {

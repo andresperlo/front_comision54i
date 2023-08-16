@@ -3,44 +3,33 @@ import { Button } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
 import { Link } from 'react-router-dom'
 import Swal from 'sweetalert2';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const CardComp = (props) => {
   const { arrayProd } = props
 
   const handleClick = async (id) => {
-    const token = JSON.parse(localStorage.getItem('token'))
-    console.log(token)
-    const idUser = JSON.parse(localStorage.getItem('idUser'))
-    const resUser = await fetch(`http://localhost:8080/api/users/${idUser}`, {
-      method:'GET',
-      headers:{
-        'content-type':'application/json',
-        'auth': `Bearer ${token}`
+    try {
+      const idUser = JSON.parse(localStorage.getItem('idUser'))
+      const resUser = await clienteAxios.get(`/users/${idUser}`, config)
+      const resCart = await clienteAxios.post(`/carts/${resUser.data.oneUser.idCart}/${id}`, {}, config)
+  
+      if(resCart.status === 200){
+        Swal.fire(
+          resCart.data.msg,
+          '',
+          'success'
+        )
       }
-    })
-    const dataUser = await resUser.json()
-
-    const idCart = dataUser.oneUser.idCart
-    const resCart = await fetch(`http://localhost:8080/api/carts/${idCart}/${id}`,{
-      method:'POST',
-      headers:{
-        'content-type':'application/json',
-        'auth': `Bearer ${JSON.parse(localStorage.getItem('token'))}`
+      
+    } catch (error) {
+      if(error.response.status === 400){
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.msg
+        })
       }
-    })
-    const dataCart = await resCart.json()
-    if(dataCart.status === 400){
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: dataCart.msg
-      })
-    }else if(dataCart.status === 200){
-      Swal.fire(
-        dataCart.msg,
-        '',
-        'success'
-      )
     }
   }
 

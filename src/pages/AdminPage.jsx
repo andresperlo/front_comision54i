@@ -3,20 +3,18 @@ import { Button } from 'react-bootstrap';
 import Table from 'react-bootstrap/Table';
 import ModalComp from '../components/ModalComp';
 import Swal from 'sweetalert2';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const AdminPage = () => {
   const [allProducts, setAllProducts] = useState([])
   const [refreshState, resRefreshState] = useState(false)
 
   const getAllProducts = async () => {
-    const res = await fetch('http://localhost:8080/api/products')
-    const response = await res.json()
-    setAllProducts(response.allProducts)
+    const res = await clienteAxios.get('/products')
+    setAllProducts(res.data.allProducts)
   }
 
   const handleClick = async (id) => {
-    const token = JSON.parse(localStorage.getItem('token'))
-    
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
@@ -35,28 +33,19 @@ const AdminPage = () => {
       reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
-
-        fetch(`http://localhost:8080/api/products/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'content-type': 'application/json',
-            'auth': `Bearer ${token}`
-          }
-        })
-          .then(res => res.json())
+        clienteAxios.delete(`products/${id}`, config)
           .then(res => {
             if (res.status === 200) {
               swalWithBootstrapButtons.fire(
                 'Eliminado!',
-                res.msg,
+                res.data.msg,
                 'success'
               )
             }
           })
 
-          resRefreshState(true)
+        resRefreshState(true)
       } else if (
-        /* Read more about handling dismissals below */
         result.dismiss === Swal.DismissReason.cancel
       ) {
         swalWithBootstrapButtons.fire(

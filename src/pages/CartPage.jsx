@@ -1,33 +1,34 @@
 import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import Table from 'react-bootstrap/Table';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const CartPage = () => {
   const [products, setProducts] = useState([])
-
-
+  
   const getCart = async () => {
-    const token = JSON.parse(localStorage.getItem('token'))
-    const idUser = JSON.parse(localStorage.getItem('idUser'))
-    const resUser = await fetch(`http://localhost:8080/api/users/${idUser}`, {
-      method: 'GET',
-      headers: {
-        'content-type': 'application/json',
-        'auth': `Bearer ${token}`
+    try {
+      const idUser = JSON.parse(localStorage.getItem('idUser'))
+      const resUser = await clienteAxios.get(`/users/${idUser}`, config)
+      const resCart = await clienteAxios.get(`/carts/${resUser.data.oneUser.idCart}`, config)
+  
+      if(resCart.status === 200){
+        setProducts(resCart.data.cart.products)
+        Swal.fire(
+          resCart.data.msg,
+          '',
+          'success'
+        )
       }
-    })
-    const dataUser = await resUser.json()
-
-    const idCart = dataUser.oneUser.idCart
-    const resCart = await fetch(`http://localhost:8080/api/carts/${idCart}`, {
-      method: 'GET',
-      headers: {
-        'content-type': 'application/json',
-        'auth': `Bearer ${token}`
+    } catch (error) {
+      if(error.response.status === 400){
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.msg
+        })
       }
-    })
-    const dataCart = await resCart.json()
-    setProducts(dataCart.cart.products)
+    }
   }
 
   useEffect(() => {

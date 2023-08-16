@@ -1,4 +1,3 @@
-import React, { useCallback, useEffect, useState } from 'react'
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -7,7 +6,6 @@ import '../css/NavbarComp.css'
 import ModalComp from './ModalComp';
 
 const NavbarComp = () => {
-  const [userType, setUserType] = useState({})
   const token = JSON.parse(localStorage.getItem('token'))
   const role = JSON.parse(localStorage.getItem('role'))
   const navigate = useNavigate();
@@ -17,28 +15,7 @@ const NavbarComp = () => {
     navigate('/')
   }
 
- /*  const getUserType = () => {
-    const allUsers = JSON.parse(localStorage.getItem('users'))
-    const userFilter = allUsers.filter((user) => user.token === token)
-    setUserType(userFilter[0])
-  } */
-
-/*   const getUserType = useCallback(async () => {
-    const allUsers = JSON.parse(localStorage.getItem('users'))
-    const userFilter = allUsers.filter((user) => user.token === token)
-    setUserType(userFilter[0])
-  }, []); */
-
-/*   useEffect(() => {
-    GetOrder()
-  }, []) */
-
- /*  useEffect(() => {
-    getUserType()
-  }, [])
- */
-
-  return (
+   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
         <Link to="/" className='navbar-link'>Logo</Link>

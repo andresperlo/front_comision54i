@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, Container } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const LoginPage = () => {
   const [formValues, setFormValues] = useState({
@@ -15,61 +16,24 @@ const LoginPage = () => {
   const handleChange = (ev) => {
     setFormValues({ ...formValues, [ev.target.name]: ev.target.value })
   }
-/* 
-  const handleClick = () => {
-    const usuarioLS = JSON.parse(localStorage.getItem('users'))
-    const userFilter = usuarioLS.filter((user) => user.userName === formValues.userName)
+  
+  const handleClick = async () => {
+    const res = await clienteAxios.post('/users/login', {
+      username: formValues.userName,
+      pass: formValues.pass
+    }, config)
 
-    if (formValues.userName === userFilter[0].userName && formValues.pass === userFilter[0].pass) {
-      userFilter[0].role === 'admin'
+    if (res.status === 200) {
+      localStorage.setItem('token', JSON.stringify(res.data.userExist.token))
+      localStorage.setItem('role', JSON.stringify(res.data.userExist.role))
+      localStorage.setItem('idUser', JSON.stringify(res.data.userExist._id))
+
+      res.data.userExist.role === 'admin'
         ?
-        (
-          localStorage.setItem('token', userFilter[0].token),
-          navigate('/admin')
-        )
-        :
-
-        (
-          localStorage.setItem('token', userFilter[0].token),
-          navigate('/user')
-          )
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Usuario y/o contraseña incorrecto',
-      })
-    }
-  } */
-
-  const handleClick = async() => {
-    const res = await fetch('http://localhost:8080/api/users/login', {
-      method:'POST',
-      headers:{
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: formValues.userName,
-        pass: formValues.pass
-      })
-    })
-    
-    const data = await res.json()
-    if(data?.userExist?.token){
-      localStorage.setItem('token', JSON.stringify(data.userExist.token))
-      localStorage.setItem('role', JSON.stringify(data.userExist.role))
-      localStorage.setItem('idUser', JSON.stringify(data.userExist._id))
-      data.userExist.role === 'admin'
-      ?
-      (
         navigate('/admin')
-      )
-      :
-
-      (
+        :
         navigate('/user')
-        )
-    }else{
+    } else {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

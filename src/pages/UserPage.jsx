@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import CardComp from '../components/CardComp'
+import clienteAxios from '../utils/axiosCliente'
 
 const UserPage = () => {
   const [allProducts, setAllProducts] = useState([])
 
   const getAllProducts = async () => {
-    const res = await fetch('http://localhost:8080/api/products')
-    const response = await res.json()
-    console.log(response)
-    setAllProducts(response.allProducts)
+    const res = await clienteAxios.get('/products')
+    setAllProducts(res.data.allProducts)
   }
 
   useEffect(() => {
     getAllProducts()
   }, [])
-
-  useEffect(() => {
-    console.log(allProducts)
-  }, [allProducts])
   
   return (
     <>

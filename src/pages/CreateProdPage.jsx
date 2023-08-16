@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const CreateProdPage = () => {
   const navigate = useNavigate()
@@ -10,7 +11,7 @@ const CreateProdPage = () => {
     username: '',
     pass: '',
     rpass: '',
-    role:''
+    role: ''
   })
 
   const handleChange = (ev) => {
@@ -18,9 +19,8 @@ const CreateProdPage = () => {
   }
 
   const handleClick = async () => {
-    
-    if(formValues.pass !== formValues.rpass){
-      console.log('no son iguales')
+
+    if (formValues.pass !== formValues.rpass) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -29,24 +29,17 @@ const CreateProdPage = () => {
       return
     }
 
-    const res = await fetch('http://localhost:8080/api/users', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: formValues.username,
-        pass: formValues.pass,
-        role: formValues.role
-      })
-    })
+    const res = await clienteAxios.post('/users', {
+      username: formValues.username,
+      pass: formValues.pass,
+      role: formValues.role
+    }, config)
 
-    const data = await res.json()
 
-    if (data.status === 201) {
+    if (res.status === 201) {
       Swal.fire(
         'Producto creado!',
-        data.msg,
+        res.data.msg,
         'success'
       )
       navigate('/admin')

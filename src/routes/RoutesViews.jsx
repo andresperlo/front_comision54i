@@ -28,32 +28,32 @@ const RoutesViews = () => {
         <Route path='/login' element={<LoginPage />} />
 
         <Route path='/user' element={
-          <PrivateRoute>
+          <PrivateRoute role='user'>
             <UserPage />
           </PrivateRoute>
         } />
         <Route path='/admin' element={
-          <PrivateRoute>
+          <PrivateRoute role='admin'>
             <AdminPage />
           </PrivateRoute>
         } />
         <Route path='/product/:id' element={
-          <PrivateRoute>
+          <PrivateRoute  role='user'>
             <ProductPage />
           </PrivateRoute>
         } />
         <Route path='/createProd' element={
-          <PrivateRoute>
+          <PrivateRoute  role='admin'>
             <CreateProdPage />
           </PrivateRoute>
         } />
         <Route path='/adminUsers' element={
-          <PrivateRoute>
+          <PrivateRoute  role='admin'>
             <AdminUserPage />
           </PrivateRoute>
         } />
         <Route path='/cartUser' element={
-          <PrivateRoute>
+          <PrivateRoute  role='user'>
             <CartPage />
           </PrivateRoute>
         } />

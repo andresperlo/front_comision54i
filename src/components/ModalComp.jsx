@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Swal from 'sweetalert2';
+import clienteAxios, { config } from '../utils/axiosCliente';
 
 const ModalComp = (props) => {
   const { type, idProd, getAllProducts } = props
@@ -14,10 +15,8 @@ const ModalComp = (props) => {
   const handleClose = () => setShow(false);
 
   const handleClick = async () => {
-    const res = await fetch(`http://localhost:8080/api/products/${idProd}`)
-    const response = await res.json()
-    console.log(response)
-    setProduct(response.oneProduct)
+    const res = await clienteAxios.get(`/products/${idProd}`, config)
+    setProduct(res.data.oneProduct)
     setShow(true)
   }
 
@@ -27,47 +26,36 @@ const ModalComp = (props) => {
   }
 
   const sendFormProd = async (id) => {
-    const token = JSON.parse(localStorage.getItem('token'))
+    try {
+      const res = await clienteAxios.put(`/products/${id}`, product, config)
 
-    const res = await fetch(`http://localhost:8080/api/products/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'auth': `Bearer ${token}`
-      },
-      body: JSON.stringify(product)
-    })
-
-    const data = await res.json()
-    if (data.status === 200) {
-      Swal.fire(
-        data.msg,
-        '',
-        'success'
-      )
-      getAllProducts()
-      handleClose()
+      if (res.status === 200) {
+        Swal.fire(
+          res.data.msg,
+          '',
+          'success'
+        )
+        getAllProducts()
+        handleClose()
+      }
+    } catch (error) {
+      if(error.response.status === 400){
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.msg
+        })
+      }
     }
   }
 
   const createProd = async () => {
-    const token = JSON.parse(localStorage.getItem('token'))
+    const res = await clienteAxios.post('/products', product, config)
 
-    const res = await fetch('http://localhost:8080/api/products', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'auth': `Bearer ${token}`
-      },
-      body: JSON.stringify(product)
-    })
-
-    const data = await res.json()
-
-    if (data.status === 201) {
+    if (res.status === 201) {
       Swal.fire(
         'Producto creado!',
-        data.msg,
+        res.data.msg,
         'success'
       )
       navigate('/admin')
